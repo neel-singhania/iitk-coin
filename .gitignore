@@ -1,0 +1,8 @@
+*.db
+*.vscode
+auth
+acc.db
+auth.db
+test.db
+trans.db
+.env

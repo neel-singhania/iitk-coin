@@ -1,85 +1,66 @@
+// main.go
+
 package main
 
 import (
-	"database/sql"
-	"log"
-	"os"
+	"github.com/neel-singhania/iitk-coin/controllers"
 
-	_ "github.com/mattn/go-sqlite3" // Import go-sqlite3 library
+	"log"
+
+	"github.com/neel-singhania/iitk-coin/models"
+
+	"github.com/neel-singhania/iitk-coin/middlewares"
+
+	"github.com/neel-singhania/iitk-coin/database"
+
+	"github.com/gin-gonic/gin"
 )
 
-type Student struct {
-	id     int
-	rollno int
-	name   string
-	//I created a struct with a struct to select the rows in the table and add data.
+func setupRouter() *gin.Engine {
+	route := gin.Default()
+
+	route.GET("/check", func(context *gin.Context) {
+		context.String(200, "good to go")
+	})
+
+	route.POST("/login", controllers.Login)
+	route.POST("/signup", controllers.Signup)
+	route.POST("/init", middlewares.Authz_Admin(), controllers.Account_init)
+	route.GET("/balance", middlewares.Authz(), controllers.GetBalance)
+	route.POST("/transfer", middlewares.Authz(), controllers.Transfer)
+	route.GET("/secretpage", middlewares.Authz(), controllers.Profile)
+
+	// api_file := route.Group("/secretpage")
+	// {
+	// 	protected_route := api_file.Group("/").Use(middlewares.Authz())
+	// 	{
+	// 		protected_route.GET("/", controllers.Profile)
+	// 	}
+	// }
+
+	return route
 }
 
 func main() {
-	os.Remove("students.db") // I delete the file to avoid duplicated records.
-	// SQLite is a file based database.
-
-	log.Println("Creating sqlite-database.db...")
-	file, err := os.Create("students.db") // Create SQLite file
+	err := database.InitDatabase()
 	if err != nil {
-		log.Fatal(err.Error())
+		log.Fatalln("could not create database", err)
 	}
-	file.Close()
-	log.Println("students.db created")
 
-	studentsDatabase, _ := sql.Open("sqlite3", "./students.db") // Open the created SQLite File
-	defer studentsDatabase.Close()                              // Defer Closing the database
-	createTable(studentsDatabase)                               // Create Database Tables
+	database.GlobalDB.AutoMigrate(&models.User{})
 
-	// INSERT RECORDS
-	insertStudent(studentsDatabase, 190538, "Neelabh Singhania")
-	insertStudent(studentsDatabase, 190666, "Palak Khandelwal")
-
-	// DISPLAY INSERTED RECORDS
-	displayStudents(studentsDatabase)
-}
-
-func createTable(db *sql.DB) {
-	createStudentTableSQL := `CREATE TABLE student (
-		"idStudent" integer NOT NULL PRIMARY KEY AUTOINCREMENT,		
-		"rollno" integer,
-		"name" TEXT		
-	  );` // SQL Statement for Create Table
-
-	log.Println("Create student table...")
-	statement, err := db.Prepare(createStudentTableSQL) // Prepare SQL Statement
-	if err != nil {
-		log.Fatal(err.Error())
+	err2 := database.InitDatabaseAcc()
+	if err2 != nil {
+		log.Fatalln("could not create Acc ", err2)
 	}
-	statement.Exec() // Execute SQL Statements
-	log.Println("student table created")
-}
+	database.GlobalDBAcc.AutoMigrate(&models.Account{})
 
-// We are passing db reference connection from main to our method with other parameters
-func insertStudent(db *sql.DB, rollno int, name string) {
-	log.Println("Inserting student record ...")
-	insertStudentSQL := `INSERT INTO student(rollno, name) VALUES (?, ?)`
-	statement, err := db.Prepare(insertStudentSQL) // Prepare statement.
-	// This is good to avoid SQL injections
-	if err != nil {
-		log.Fatalln(err.Error())
+	err3 := database.InitDatabaseTrans()
+	if err3 != nil {
+		log.Fatalln("could not create Transfer database.... ", err3)
 	}
-	_, err = statement.Exec(rollno, name)
-	if err != nil {
-		log.Fatalln(err.Error())
-	}
-}
+	database.GlobalDBTrans.AutoMigrate(&models.Transaction{})
 
-func displayStudents(db *sql.DB) {
-	row, err := db.Query("SELECT * FROM student ORDER BY name")
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer row.Close()
-	for row.Next() { // Iterate and fetch the records from result cursor
-		var newStudent Student
-		//var program string
-		row.Scan(&newStudent.id, &newStudent.rollno, &newStudent.name)
-		log.Println("Student: ", newStudent.rollno, " ", newStudent.name)
-	}
+	route := setupRouter()
+	route.Run(":8080")
 }
