@@ -3,21 +3,23 @@
 # SnT summer project
  IITK-coin 
 
- <h2>endpoins :-</h2>
+Backend for a centralized coin exchange system, developed under the mentorship of P-club IIT Kanpur
+
+ <h2>endpoins</h2>
 <h3>For user auth</h3>                    
  POST  req at  "http://localhost:8080/signin" for signin
 <h5>Example req </h5>
-{ <br>
-  "roll_no" : "190460" , <br>
-  "password" : "pass" <br>
-} <br> 
+{
+  "roll_no" : "195380" , <br>
+  "password" : "password" <br>
+} 
 <br>
- POST  req at  "http://localhost:8080/signup" for registring a new user
+ POST  req at  "http://localhost:8080/signup"
 <h5>Example req </h5>
-{ <br>
+{
   "roll_no" : "190460" , <br>
   "password" : "pass" <br>
-} <br> 
+} 
 <br>
  GET  req at  "http://localhost:8080/secretpage" <br>
 Add JWT token in the header of req...
