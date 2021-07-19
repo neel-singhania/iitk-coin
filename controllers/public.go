@@ -37,7 +37,7 @@ type BalancePayload struct {
 
 type BalanceResponse struct {
 	Owner   string `json:"roll_no"`
-	Balance int64  `json:"balance`
+	Balance int64  `json:"balance"`
 }
 
 // Transfer payload..
@@ -163,7 +163,7 @@ func Login(context *gin.Context) {
 	return
 }
 
-//Account INIT
+// Account INIT
 func Account_init(context *gin.Context) {
 	var payload InitPayload
 	var account models.Account

@@ -3,7 +3,7 @@
 package database
 
 import (
-	"gorm.io/driver/sqlite"
+	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
 
@@ -13,8 +13,8 @@ var GlobalDBAcc *gorm.DB
 var GlobalDBTrans *gorm.DB
 
 // InitDatabase creates a sqlite db
-func InitDatabase() (err error) {
-	GlobalDB, err = gorm.Open(sqlite.Open("auth.db"), &gorm.Config{})
+func InitDatabase(dsn string) (err error) {
+	GlobalDB, err = gorm.Open(postgres.Open(dsn), &gorm.Config{})
 	if err != nil {
 		return
 	}
@@ -22,16 +22,16 @@ func InitDatabase() (err error) {
 	return
 }
 
-func InitDatabaseAcc() (err error) {
-	GlobalDBAcc, err = gorm.Open(sqlite.Open("acc.db"), &gorm.Config{})
+func InitDatabaseAcc(dsn string) (err error) {
+	GlobalDBAcc, err = gorm.Open(postgres.Open(dsn), &gorm.Config{})
 	if err != nil {
 		return
 	}
 	return
 }
 
-func InitDatabaseTrans() (err error) {
-	GlobalDBTrans, err = gorm.Open(sqlite.Open("trans.db"), &gorm.Config{})
+func InitDatabaseTrans(dsn string) (err error) {
+	GlobalDBTrans, err = gorm.Open(postgres.Open(dsn), &gorm.Config{})
 	if err != nil {
 		return
 	}

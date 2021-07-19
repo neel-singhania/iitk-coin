@@ -3,6 +3,8 @@
 package main
 
 import (
+	"os"
+
 	"github.com/neel-singhania/iitk-coin/controllers"
 
 	"log"
@@ -42,22 +44,25 @@ func setupRouter() *gin.Engine {
 }
 
 func main() {
-	err := database.InitDatabase()
+	dsn := os.Getenv("DATABASE_URL")
+	err := database.InitDatabase(dsn)
 	if err != nil {
 		log.Fatalln("could not create database", err)
 	}
 
 	database.GlobalDB.AutoMigrate(&models.User{})
 
-	err2 := database.InitDatabaseAcc()
-	if err2 != nil {
-		log.Fatalln("could not create Acc ", err2)
+	dsn = os.Getenv("ACCOUNT_DATABASE_URL")
+	err = database.InitDatabaseAcc(dsn)
+	if err != nil {
+		log.Fatalln("could not create Acc ", err)
 	}
 	database.GlobalDBAcc.AutoMigrate(&models.Account{})
 
-	err3 := database.InitDatabaseTrans()
-	if err3 != nil {
-		log.Fatalln("could not create Transfer database.... ", err3)
+	dsn = os.Getenv("TRANSACTION_DATABASE_URL")
+	err = database.InitDatabaseTrans(dsn)
+	if err != nil {
+		log.Fatalln("could not create Transfer database.... ", err)
 	}
 	database.GlobalDBTrans.AutoMigrate(&models.Transaction{})
 
